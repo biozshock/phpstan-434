@@ -1,0 +1,26 @@
+name: Continuous Integration
+on:
+  push:
+  pull_request:
+
+jobs:
+  integration:
+    name: Check
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        php-version: [7.4]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+      - name: Install composer requirements.
+        run: composer install
+      - name: Warmup cache
+        run: ./bin/console cache:warmup
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse -c phpstan.neon src -l max --memory-limit=1G --no-progress
